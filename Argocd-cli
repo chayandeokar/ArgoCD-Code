@@ -1,0 +1,39 @@
+# Get the latest Argo CD version
+VERSION=$(curl -L -s https://raw.githubusercontent.com/argoproj/argo-cd/stable/VERSION)
+
+# Download the Argo CD binary
+curl -sSL -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/download/v$VERSION/argocd-linux-amd64
+
+
+# Move the binary to /usr/local/bin and set executable permissions
+sudo install -m 555 argocd-linux-amd64 /usr/local/bin/argocd
+
+# Remove the binary file from your current directory
+rm argocd-linux-amd64
+
+
+argocd version
+
+kubectl create namespace argocd
+
+
+kubectl -n argocd get secret argocd-initial-admin-secret -o=jsonpath='{.data.password}' | base64 -d
+
+
+argocd login <ARGOCD_SERVER_IP> --username admin --password <PASSWORD>
+
+
+# List Argo CD applications in the argocd namespace
+argocd app list --namespace argocd
+
+# List Argo CD clusters
+argocd cluster list
+
+
+argocd app create chayan --repo https://github.com/chayandeokar/ArgoCD-Code --path prod --dest-server https://kubernetes.default.svc --dest-namespace argocd-apps
+
+argocd app sync argocd/chayan
+
+argocd app get  argocd/chayan
+
+argocd app history argocd/chayan
